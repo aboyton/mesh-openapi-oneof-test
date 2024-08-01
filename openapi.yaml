@@ -19,34 +19,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Pet'
-  /dogs/{id}:
-    get:
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dog'
-  /cats/{id}:
-    get:
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Cat'
 
 components:
   schemas:
@@ -57,27 +29,21 @@ components:
       discriminator:
         propertyName: petType
         mapping:
-          Dog: '#/components/schemas/Dog'
-          Cat: '#/components/schemas/Cat'
+          "pet-cat": '#/components/schemas/Cat'
+          "pet-dog": '#/components/schemas/Dog'
       properties:
         name:
           type: string
         petType:
           type: string
     Cat:
+      title: "Cat"
       allOf:
         - $ref: '#/components/schemas/Pet'
-        - type: object
-          properties:
-            cat_exclusive:
-              type: string
     Dog:
+      title: "Dog"
       allOf:
         - $ref: '#/components/schemas/Pet'
-        - type: object
-          properties:
-            dog_exclusive:
-              type: string
   requestBodies:
     Pet:
       required: true

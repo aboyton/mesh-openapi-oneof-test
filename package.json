@@ -14,8 +14,8 @@
     "bun-types": "^0.5.0"
   },
   "dependencies": {
-    "@graphql-mesh/cli": "^0.82.35",
-    "@graphql-mesh/openapi": "^0.93.1",
+    "@graphql-mesh/cli": "0.83.0-alpha-20230602110655-2f92b7981",
+    "@graphql-mesh/openapi": "0.94.0-alpha-20230602110655-2f92b7981",
     "esno": "^0.16.3",
     "express": "^4.18.2",
     "express-openapi-validator": "^5.0.4",

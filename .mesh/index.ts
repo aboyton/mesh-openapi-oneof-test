@@ -12,57 +12,45 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 
 
 
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string;
+  ID: { input: string; output: string; }
   /** The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text. */
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
-  ObjMap: any;
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  ObjMap: { input: any; output: any; }
+};
+
+export type Cat = Pet & {
+  name: Scalars['String']['output'];
+  petType?: Maybe<Scalars['String']['output']>;
+};
+
+export type Pet = {
+  name: Scalars['String']['output'];
+  petType?: Maybe<Scalars['String']['output']>;
+};
+
+export type Dog = Pet & {
+  name: Scalars['String']['output'];
+  petType?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
   pets_by_id?: Maybe<Pet>;
-  dogs_by_id?: Maybe<Dog>;
-  cats_by_id?: Maybe<Cat>;
 };
 
 
 export type Querypets_by_idArgs = {
-  id: Scalars['String'];
-};
-
-
-export type Querydogs_by_idArgs = {
-  id: Scalars['String'];
-};
-
-
-export type Querycats_by_idArgs = {
-  id: Scalars['String'];
-};
-
-export type Pet = {
-  name: Scalars['String'];
-  petType?: Maybe<Scalars['String']>;
-};
-
-export type Dog = Pet & {
-  name: Scalars['String'];
-  petType?: Maybe<Scalars['String']>;
-  dog_exclusive?: Maybe<Scalars['String']>;
-};
-
-export type Cat = Pet & {
-  name: Scalars['String'];
-  petType?: Maybe<Scalars['String']>;
-  cat_exclusive?: Maybe<Scalars['String']>;
+  id: Scalars['String']['input'];
 };
 
 export type HTTPMethod =
@@ -159,67 +147,71 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 
+/** Mapping of interface types */
+export type ResolversInterfaceTypes<_RefType extends Record<string, unknown>> = ResolversObject<{
+  Pet: ( Cat ) | ( Dog );
+}>;
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  Query: ResolverTypeWrapper<{}>;
-  Pet: ResolversTypes['Dog'] | ResolversTypes['Cat'];
-  String: ResolverTypeWrapper<Scalars['String']>;
-  Dog: ResolverTypeWrapper<Dog>;
   Cat: ResolverTypeWrapper<Cat>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  ObjMap: ResolverTypeWrapper<Scalars['ObjMap']>;
+  Pet: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['Pet']>;
+  String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Dog: ResolverTypeWrapper<Dog>;
+  Query: ResolverTypeWrapper<{}>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  ObjMap: ResolverTypeWrapper<Scalars['ObjMap']['output']>;
   HTTPMethod: HTTPMethod;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  Query: {};
-  Pet: ResolversParentTypes['Dog'] | ResolversParentTypes['Cat'];
-  String: Scalars['String'];
-  Dog: Dog;
   Cat: Cat;
-  Boolean: Scalars['Boolean'];
-  ObjMap: Scalars['ObjMap'];
+  Pet: ResolversInterfaceTypes<ResolversParentTypes>['Pet'];
+  String: Scalars['String']['output'];
+  Dog: Dog;
+  Query: {};
+  Boolean: Scalars['Boolean']['output'];
+  ObjMap: Scalars['ObjMap']['output'];
 }>;
 
 export type discriminatorDirectiveArgs = {
-  field?: Maybe<Scalars['String']>;
-  mapping?: Maybe<Scalars['ObjMap']>;
+  field?: Maybe<Scalars['String']['input']>;
+  mapping?: Maybe<Scalars['ObjMap']['input']>;
 };
 
 export type discriminatorDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = discriminatorDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type globalOptionsDirectiveArgs = {
-  sourceName?: Maybe<Scalars['String']>;
-  endpoint?: Maybe<Scalars['String']>;
-  operationHeaders?: Maybe<Scalars['ObjMap']>;
-  queryStringOptions?: Maybe<Scalars['ObjMap']>;
-  queryParams?: Maybe<Scalars['ObjMap']>;
+  sourceName?: Maybe<Scalars['String']['input']>;
+  endpoint?: Maybe<Scalars['String']['input']>;
+  operationHeaders?: Maybe<Scalars['ObjMap']['input']>;
+  queryStringOptions?: Maybe<Scalars['ObjMap']['input']>;
+  queryParams?: Maybe<Scalars['ObjMap']['input']>;
 };
 
 export type globalOptionsDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = globalOptionsDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type httpOperationDirectiveArgs = {
-  path?: Maybe<Scalars['String']>;
-  operationSpecificHeaders?: Maybe<Scalars['ObjMap']>;
+  path?: Maybe<Scalars['String']['input']>;
+  operationSpecificHeaders?: Maybe<Scalars['ObjMap']['input']>;
   httpMethod?: Maybe<HTTPMethod>;
-  isBinary?: Maybe<Scalars['Boolean']>;
-  requestBaseBody?: Maybe<Scalars['ObjMap']>;
-  queryParamArgMap?: Maybe<Scalars['ObjMap']>;
-  queryStringOptionsByParam?: Maybe<Scalars['ObjMap']>;
+  isBinary?: Maybe<Scalars['Boolean']['input']>;
+  requestBaseBody?: Maybe<Scalars['ObjMap']['input']>;
+  queryParamArgMap?: Maybe<Scalars['ObjMap']['input']>;
+  queryStringOptionsByParam?: Maybe<Scalars['ObjMap']['input']>;
 };
 
 export type httpOperationDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = httpOperationDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
-export type QueryResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  pets_by_id?: Resolver<Maybe<ResolversTypes['Pet']>, ParentType, ContextType, RequireFields<Querypets_by_idArgs, 'id'>>;
-  dogs_by_id?: Resolver<Maybe<ResolversTypes['Dog']>, ParentType, ContextType, RequireFields<Querydogs_by_idArgs, 'id'>>;
-  cats_by_id?: Resolver<Maybe<ResolversTypes['Cat']>, ParentType, ContextType, RequireFields<Querycats_by_idArgs, 'id'>>;
+export type CatResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Cat'] = ResolversParentTypes['Cat']> = ResolversObject<{
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type PetResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Pet'] = ResolversParentTypes['Pet']> = ResolversObject<{
-  __resolveType: TypeResolveFn<'Dog' | 'Cat', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'Cat' | 'Dog', ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 }>;
@@ -227,15 +219,11 @@ export type PetResolvers<ContextType = MeshContext, ParentType extends Resolvers
 export type DogResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Dog'] = ResolversParentTypes['Dog']> = ResolversObject<{
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  dog_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type CatResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Cat'] = ResolversParentTypes['Cat']> = ResolversObject<{
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  cat_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+export type QueryResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  pets_by_id?: Resolver<Maybe<ResolversTypes['Pet']>, ParentType, ContextType, RequireFields<Querypets_by_idArgs, 'id'>>;
 }>;
 
 export interface ObjMapScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjMap'], any> {
@@ -243,10 +231,10 @@ export interface ObjMapScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type Resolvers<ContextType = MeshContext> = ResolversObject<{
-  Query?: QueryResolvers<ContextType>;
+  Cat?: CatResolvers<ContextType>;
   Pet?: PetResolvers<ContextType>;
   Dog?: DogResolvers<ContextType>;
-  Cat?: CatResolvers<ContextType>;
+  Query?: QueryResolvers<ContextType>;
   ObjMap?: GraphQLScalarType;
 }>;
 
