@@ -1,0 +1,4 @@
+# Extend and modify generated schema and add additional model here
+extend type Query {
+  greeting(name: String!): String!
+}

@@ -1,12 +1,25 @@
 // @ts-nocheck
 import { GraphQLResolveInfo, SelectionSetNode, FieldNode, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { findAndParseConfig } from '@graphql-mesh/cli';
+import type { GetMeshOptions } from '@graphql-mesh/runtime';
+import type { YamlConfig } from '@graphql-mesh/types';
+import { PubSub } from '@graphql-mesh/utils';
+import { DefaultLogger } from '@graphql-mesh/utils';
+import MeshCache from "@graphql-mesh/cache-localforage";
+import { fetch as fetchFn } from '@whatwg-node/fetch';
+
+import { MeshResolvedSource } from '@graphql-mesh/runtime';
+import { MeshTransform, MeshPlugin } from '@graphql-mesh/types';
+import OpenapiHandler from "@graphql-mesh/openapi"
+import { parse } from 'graphql';
+import BareMerger from "@graphql-mesh/merger-bare";
 import { createMeshHTTPHandler, MeshHTTPHandler } from '@graphql-mesh/http';
 import { getMesh, ExecuteMeshFn, SubscribeMeshFn, MeshContext as BaseMeshContext, MeshInstance } from '@graphql-mesh/runtime';
 import { MeshStore, FsStoreStorageAdapter } from '@graphql-mesh/store';
 import { path as pathModule } from '@graphql-mesh/cross-helpers';
 import { ImportFn } from '@graphql-mesh/types';
 import type { PetStoreTypes } from './sources/petStore/types';
+import * as importedModule$0 from "./../.meshrc.js";
+import * as importedModule$1 from "./sources/petStore/schemaWithAnnotations";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -30,6 +43,8 @@ export type Scalars = {
 };
 
 export type Cat = Pet & {
+  __typename: 'Cat';
+  cat_exclusive?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
@@ -40,17 +55,26 @@ export type Pet = {
 };
 
 export type Dog = Pet & {
+  __typename: 'Dog';
+  dog_exclusive?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
+  __typename: 'Query';
   pets_by_id?: Maybe<Pet>;
+  greeting: Scalars['String']['output'];
 };
 
 
 export type Querypets_by_idArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QuerygreetingArgs = {
+  name: Scalars['String']['input'];
 };
 
 export type HTTPMethod =
@@ -160,8 +184,8 @@ export type ResolversTypes = ResolversObject<{
   Dog: ResolverTypeWrapper<Dog>;
   Query: ResolverTypeWrapper<{}>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  ObjMap: ResolverTypeWrapper<Scalars['ObjMap']['output']>;
   HTTPMethod: HTTPMethod;
+  ObjMap: ResolverTypeWrapper<Scalars['ObjMap']['output']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -176,35 +200,41 @@ export type ResolversParentTypes = ResolversObject<{
 }>;
 
 export type discriminatorDirectiveArgs = {
+  subgraph?: Maybe<Scalars['String']['input']>;
   field?: Maybe<Scalars['String']['input']>;
-  mapping?: Maybe<Scalars['ObjMap']['input']>;
+  mapping?: Maybe<Array<Maybe<Array<Maybe<Scalars['String']['input']>>>>>;
 };
 
 export type discriminatorDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = discriminatorDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
-export type globalOptionsDirectiveArgs = {
-  sourceName?: Maybe<Scalars['String']['input']>;
-  endpoint?: Maybe<Scalars['String']['input']>;
-  operationHeaders?: Maybe<Scalars['ObjMap']['input']>;
-  queryStringOptions?: Maybe<Scalars['ObjMap']['input']>;
-  queryParams?: Maybe<Scalars['ObjMap']['input']>;
-};
-
-export type globalOptionsDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = globalOptionsDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
-
 export type httpOperationDirectiveArgs = {
+  subgraph?: Maybe<Scalars['String']['input']>;
   path?: Maybe<Scalars['String']['input']>;
-  operationSpecificHeaders?: Maybe<Scalars['ObjMap']['input']>;
+  operationSpecificHeaders?: Maybe<Array<Maybe<Array<Maybe<Scalars['String']['input']>>>>>;
   httpMethod?: Maybe<HTTPMethod>;
   isBinary?: Maybe<Scalars['Boolean']['input']>;
   requestBaseBody?: Maybe<Scalars['ObjMap']['input']>;
   queryParamArgMap?: Maybe<Scalars['ObjMap']['input']>;
   queryStringOptionsByParam?: Maybe<Scalars['ObjMap']['input']>;
+  jsonApiFields?: Maybe<Scalars['Boolean']['input']>;
+  queryStringOptions?: Maybe<Scalars['ObjMap']['input']>;
 };
 
 export type httpOperationDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = httpOperationDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
+export type transportDirectiveArgs = {
+  subgraph?: Maybe<Scalars['String']['input']>;
+  kind?: Maybe<Scalars['String']['input']>;
+  location?: Maybe<Scalars['String']['input']>;
+  headers?: Maybe<Array<Maybe<Array<Maybe<Scalars['String']['input']>>>>>;
+  queryStringOptions?: Maybe<Scalars['ObjMap']['input']>;
+  queryParams?: Maybe<Array<Maybe<Array<Maybe<Scalars['String']['input']>>>>>;
+};
+
+export type transportDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = transportDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
 export type CatResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Cat'] = ResolversParentTypes['Cat']> = ResolversObject<{
+  cat_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -217,6 +247,7 @@ export type PetResolvers<ContextType = MeshContext, ParentType extends Resolvers
 }>;
 
 export type DogResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Dog'] = ResolversParentTypes['Dog']> = ResolversObject<{
+  dog_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -224,6 +255,7 @@ export type DogResolvers<ContextType = MeshContext, ParentType extends Resolvers
 
 export type QueryResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   pets_by_id?: Resolver<Maybe<ResolversTypes['Pet']>, ParentType, ContextType, RequireFields<Querypets_by_idArgs, 'id'>>;
+  greeting?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QuerygreetingArgs, 'name'>>;
 }>;
 
 export interface ObjMapScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['ObjMap'], any> {
@@ -240,8 +272,8 @@ export type Resolvers<ContextType = MeshContext> = ResolversObject<{
 
 export type DirectiveResolvers<ContextType = MeshContext> = ResolversObject<{
   discriminator?: discriminatorDirectiveResolver<any, any, ContextType>;
-  globalOptions?: globalOptionsDirectiveResolver<any, any, ContextType>;
   httpOperation?: httpOperationDirectiveResolver<any, any, ContextType>;
+  transport?: transportDirectiveResolver<any, any, ContextType>;
 }>;
 
 export type MeshContext = PetStoreTypes.Context & BaseMeshContext;
@@ -252,6 +284,12 @@ const baseDir = pathModule.join(typeof __dirname === 'string' ? __dirname : '/',
 const importFn: ImportFn = <T>(moduleId: string) => {
   const relativeModuleId = (pathModule.isAbsolute(moduleId) ? pathModule.relative(baseDir, moduleId) : moduleId).split('\\').join('/').replace(baseDir + '/', '');
   switch(relativeModuleId) {
+    case ".meshrc.ts":
+      return Promise.resolve(importedModule$0) as T;
+    
+    case ".mesh/sources/petStore/schemaWithAnnotations":
+      return Promise.resolve(importedModule$1) as T;
+    
     default:
       return Promise.reject(new Error(`Cannot find module '${relativeModuleId}'.`));
   }
@@ -266,15 +304,67 @@ const rootStore = new MeshStore('.mesh', new FsStoreStorageAdapter({
   validate: false
 });
 
-export function getMeshOptions() {
-  console.warn('WARNING: These artifacts are built for development mode. Please run "mesh build" to build production artifacts');
-  return findAndParseConfig({
-    dir: baseDir,
-    artifactsDir: ".mesh",
-    configName: "mesh",
-    additionalPackagePrefixes: [],
-    initialLoggerPrefix: "🕸️  Mesh",
-  });
+export const rawServeConfig: YamlConfig.Config['serve'] = {"browser":true,"port":3008} as any
+export async function getMeshOptions(): Promise<GetMeshOptions> {
+const pubsub = new PubSub();
+const sourcesStore = rootStore.child('sources');
+const logger = new DefaultLogger("🕸️  Mesh");
+const cache = new (MeshCache as any)({
+      ...({} as any),
+      importFn,
+      store: rootStore.child('cache'),
+      pubsub,
+      logger,
+    } as any)
+
+const sources: MeshResolvedSource[] = [];
+const transforms: MeshTransform[] = [];
+const additionalEnvelopPlugins: MeshPlugin<any>[] = [];
+const petStoreTransforms = [];
+const petStoreHandler = new OpenapiHandler({
+              name: "petStore",
+              config: {"source":"./openapi.yaml","endpoint":"http://localhost:3000/"},
+              baseDir,
+              cache,
+              pubsub,
+              store: sourcesStore.child("petStore"),
+              logger: logger.child("petStore"),
+              importFn,
+            });
+sources[0] = {
+          name: 'petStore',
+          handler: petStoreHandler,
+          transforms: petStoreTransforms
+        }
+const additionalTypeDefs = [parse("extend type Query {\n  greeting(name: String!): String!\n}"),] as any[];
+const additionalResolvers = await Promise.all([
+        import("../src/resolvers")
+            .then(m => m.resolvers || m.default || m)
+      ]);
+const merger = new(BareMerger as any)({
+        cache,
+        pubsub,
+        logger: logger.child('bareMerger'),
+        store: rootStore.child('bareMerger')
+      })
+
+  return {
+    sources,
+    transforms,
+    additionalTypeDefs,
+    additionalResolvers,
+    cache,
+    pubsub,
+    merger,
+    logger,
+    additionalEnvelopPlugins,
+    get documents() {
+      return [
+      
+    ];
+    },
+    fetchFn,
+  };
 }
 
 export function createBuiltMeshHTTPHandler<TServerContext = {}>(): MeshHTTPHandler<TServerContext> {
@@ -285,10 +375,27 @@ export function createBuiltMeshHTTPHandler<TServerContext = {}>(): MeshHTTPHandl
   })
 }
 
+
 let meshInstance$: Promise<MeshInstance> | undefined;
+
+export const pollingInterval = null;
 
 export function getBuiltMesh(): Promise<MeshInstance> {
   if (meshInstance$ == null) {
+    if (pollingInterval) {
+      setInterval(() => {
+        getMeshOptions()
+        .then(meshOptions => getMesh(meshOptions))
+        .then(newMesh =>
+          meshInstance$.then(oldMesh => {
+            oldMesh.destroy()
+            meshInstance$ = Promise.resolve(newMesh)
+          })
+        ).catch(err => {
+          console.error("Mesh polling failed so the existing version will be used:", err);
+        });
+      }, pollingInterval)
+    }
     meshInstance$ = getMeshOptions().then(meshOptions => getMesh(meshOptions)).then(mesh => {
       const id = mesh.pubsub.subscribe('destroy', () => {
         meshInstance$ = undefined;

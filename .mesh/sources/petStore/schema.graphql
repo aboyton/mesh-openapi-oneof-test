@@ -2,32 +2,33 @@ schema {
   query: Query
 }
 
-directive @discriminator(field: String, mapping: ObjMap) on INTERFACE | UNION
+directive @discriminator(subgraph: String, field: String, mapping: [[String]]) on INTERFACE | UNION
 
-directive @globalOptions(sourceName: String, endpoint: String, operationHeaders: ObjMap, queryStringOptions: ObjMap, queryParams: ObjMap) on OBJECT
+directive @httpOperation(subgraph: String, path: String, operationSpecificHeaders: [[String]], httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap, jsonApiFields: Boolean, queryStringOptions: ObjMap) on FIELD_DEFINITION
 
-directive @httpOperation(path: String, operationSpecificHeaders: ObjMap, httpMethod: HTTPMethod, isBinary: Boolean, requestBaseBody: ObjMap, queryParamArgMap: ObjMap, queryStringOptionsByParam: ObjMap) on FIELD_DEFINITION
+directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Cat implements Pet {
+  cat_exclusive: String
   name: String!
   petType: String
 }
 
-interface Pet @discriminator(field: "petType", mapping: "{\"pet-cat\":\"Cat\",\"pet-dog\":\"Dog\"}") {
+interface Pet @discriminator(subgraph: "petStore", field: "petType", mapping: [["cat", "Cat"], ["dog", "Dog"]]) {
   name: String!
   petType: String
 }
 
 type Dog implements Pet {
+  dog_exclusive: String
   name: String!
   petType: String
 }
 
-type Query @globalOptions(sourceName: "petStore", endpoint: "http://localhost:3000/") {
-  pets_by_id(id: String!): Pet @httpOperation(path: "/pets/{args.id}", operationSpecificHeaders: "{\"accept\":\"application/json\"}", httpMethod: GET)
+type Query {
+  pets_by_id(id: String!): Pet @httpOperation(subgraph: "petStore", path: "/pets/{args.id}", operationSpecificHeaders: [["accept", "application/json"]], httpMethod: GET)
+  greeting(name: String!): String!
 }
-
-scalar ObjMap
 
 enum HTTPMethod {
   GET
@@ -40,3 +41,5 @@ enum HTTPMethod {
   TRACE
   PATCH
 }
+
+scalar ObjMap

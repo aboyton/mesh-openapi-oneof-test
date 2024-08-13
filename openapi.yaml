@@ -29,21 +29,27 @@ components:
       discriminator:
         propertyName: petType
         mapping:
-          "pet-cat": '#/components/schemas/Cat'
-          "pet-dog": '#/components/schemas/Dog'
+          "cat": '#/components/schemas/Cat'
+          "dog": '#/components/schemas/Dog'
       properties:
         name:
           type: string
         petType:
           type: string
     Cat:
-      title: "Cat"
       allOf:
         - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            cat_exclusive:
+              type: string
     Dog:
-      title: "Dog"
       allOf:
         - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            dog_exclusive:
+              type: string
   requestBodies:
     Pet:
       required: true

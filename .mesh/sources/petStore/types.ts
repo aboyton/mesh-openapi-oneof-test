@@ -23,6 +23,7 @@ export type Scalars = {
 };
 
 export type Cat = Pet & {
+  cat_exclusive?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
@@ -33,17 +34,24 @@ export type Pet = {
 };
 
 export type Dog = Pet & {
+  dog_exclusive?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
   pets_by_id?: Maybe<Pet>;
+  greeting: Scalars['String']['output'];
 };
 
 
 export type Querypets_by_idArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type QuerygreetingArgs = {
+  name: Scalars['String']['input'];
 };
 
 export type HTTPMethod =
@@ -59,7 +67,9 @@ export type HTTPMethod =
 
   export type QuerySdk = {
       /** undefined **/
-  pets_by_id: InContextSdkMethod<Query['pets_by_id'], Querypets_by_idArgs, MeshContext>
+  pets_by_id: InContextSdkMethod<Query['pets_by_id'], Querypets_by_idArgs, MeshContext>,
+  /** undefined **/
+  greeting: InContextSdkMethod<Query['greeting'], QuerygreetingArgs, MeshContext>
   };
 
   export type MutationSdk = {

@@ -6,7 +6,8 @@
     "server:rest": "tsx watch src/index.ts",
     "dev": "tsx node_modules/.bin/mesh dev",
     "build": "tsx node_modules/.bin/mesh build",
-    "start": "tsx node_modules/.bin/mesh start"
+    "start": "tsx node_modules/.bin/mesh start",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
@@ -14,8 +15,8 @@
     "bun-types": "^0.5.0"
   },
   "dependencies": {
-    "@graphql-mesh/cli": "0.83.0-alpha-20230602110655-2f92b7981",
-    "@graphql-mesh/openapi": "0.94.0-alpha-20230602110655-2f92b7981",
+    "@graphql-mesh/cli": "0.92.8-alpha-20240801160050-ec7101e8afed47a879c8e214de01c7cc0dbde061",
+    "@graphql-mesh/openapi": "0.103.0-alpha-20240801160050-ec7101e8afed47a879c8e214de01c7cc0dbde061",
     "esno": "^0.16.3",
     "express": "^4.18.2",
     "express-openapi-validator": "^5.0.4",
