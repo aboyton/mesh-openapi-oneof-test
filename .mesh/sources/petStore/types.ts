@@ -23,7 +23,7 @@ export type Scalars = {
 };
 
 export type Cat = Pet & {
-  cat_exclusive?: Maybe<Scalars['String']['output']>;
+  cat_exclusive: Scalars['String']['output'];
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
@@ -34,7 +34,7 @@ export type Pet = {
 };
 
 export type Dog = Pet & {
-  dog_exclusive?: Maybe<Scalars['String']['output']>;
+  dog_exclusive: Scalars['String']['output'];
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };

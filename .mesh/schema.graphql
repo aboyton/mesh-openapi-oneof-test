@@ -9,7 +9,7 @@ directive @httpOperation(subgraph: String, path: String, operationSpecificHeader
 directive @transport(subgraph: String, kind: String, location: String, headers: [[String]], queryStringOptions: ObjMap, queryParams: [[String]]) repeatable on SCHEMA
 
 type Cat implements Pet {
-  cat_exclusive: String
+  cat_exclusive: String!
   name: String!
   petType: String
 }
@@ -20,7 +20,7 @@ interface Pet @discriminator(subgraph: "petStore", field: "petType", mapping: [[
 }
 
 type Dog implements Pet {
-  dog_exclusive: String
+  dog_exclusive: String!
   name: String!
   petType: String
 }

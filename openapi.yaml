@@ -43,6 +43,8 @@ components:
           properties:
             cat_exclusive:
               type: string
+          required:
+            - cat_exclusive
     Dog:
       allOf:
         - $ref: '#/components/schemas/Pet'
@@ -50,6 +52,8 @@ components:
           properties:
             dog_exclusive:
               type: string
+          required:
+            - dog_exclusive
   requestBodies:
     Pet:
       required: true

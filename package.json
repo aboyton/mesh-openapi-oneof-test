@@ -15,7 +15,7 @@
     "bun-types": "^0.5.0"
   },
   "dependencies": {
-    "@graphql-mesh/cli": "0.92.8-alpha-20240801160050-ec7101e8afed47a879c8e214de01c7cc0dbde061",
+    "@graphql-mesh/cli": "0.94.0-alpha-20240814100541-91b0caf92c30f63f15f3faea8a39c0eb55eb2d3e",
     "@graphql-mesh/openapi": "0.103.0-alpha-20240801160050-ec7101e8afed47a879c8e214de01c7cc0dbde061",
     "esno": "^0.16.3",
     "express": "^4.18.2",

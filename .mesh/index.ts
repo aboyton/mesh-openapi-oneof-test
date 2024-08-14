@@ -43,8 +43,7 @@ export type Scalars = {
 };
 
 export type Cat = Pet & {
-  __typename: 'Cat';
-  cat_exclusive?: Maybe<Scalars['String']['output']>;
+  cat_exclusive: Scalars['String']['output'];
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
@@ -55,14 +54,12 @@ export type Pet = {
 };
 
 export type Dog = Pet & {
-  __typename: 'Dog';
-  dog_exclusive?: Maybe<Scalars['String']['output']>;
+  dog_exclusive: Scalars['String']['output'];
   name: Scalars['String']['output'];
   petType?: Maybe<Scalars['String']['output']>;
 };
 
 export type Query = {
-  __typename: 'Query';
   pets_by_id?: Maybe<Pet>;
   greeting: Scalars['String']['output'];
 };
@@ -234,7 +231,7 @@ export type transportDirectiveArgs = {
 export type transportDirectiveResolver<Result, Parent, ContextType = MeshContext, Args = transportDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type CatResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Cat'] = ResolversParentTypes['Cat']> = ResolversObject<{
-  cat_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  cat_exclusive?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -247,7 +244,7 @@ export type PetResolvers<ContextType = MeshContext, ParentType extends Resolvers
 }>;
 
 export type DogResolvers<ContextType = MeshContext, ParentType extends ResolversParentTypes['Dog'] = ResolversParentTypes['Dog']> = ResolversObject<{
-  dog_exclusive?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  dog_exclusive?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   petType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
